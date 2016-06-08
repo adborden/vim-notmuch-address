@@ -19,7 +19,11 @@ function! CompleteNotmuchAddress(findstart, base)
       endwhile
       return start
     else
-      for m in systemlist("notmuch address -- from:" . shellescape(a:base))
+      let address_tag = ""
+      if exists("g:notmuch_address_tag")
+        let address_tag = "tag:" . shellescape(g:notmuch_address_tag)
+      endif
+      for m in systemlist("notmuch address -- " . address_tag . " from:" . shellescape(a:base))
         if complete_check()
           break
         endif
