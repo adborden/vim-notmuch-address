@@ -13,17 +13,27 @@ function! CompleteNotmuchAddress(findstart, base)
   if curline =~ '^From: ' || curline =~ '^To: ' || curline =~ '^Cc: ' || curline =~ '^Bcc: '
     if a:findstart
       " locate the start of the word
+      let header_limit = stridx(curline, ": ") + 2 " Find end of the header
       let start = col('.') - 1
-      while start > 0 && curline[start - 2] != ":" && curline[start - 2] != ","
+      while start > header_limit && curline[start - 2] != ","
         let start -= 1
       endwhile
       return start
     else
+      if a:base =~ ':'
+        " Assume this is a notmuch search query using notmuch-search-terms(7)
+        let search_prefix = ""
+      else
+        " Only search mailboxes from the From: line
+        let search_prefix = "from:"
+      endif
+
       let address_tag = ""
       if exists("g:notmuch_address_tag")
         let address_tag = "tag:" . shellescape(g:notmuch_address_tag)
       endif
-      for m in systemlist("notmuch address -- " . address_tag . " from:" . shellescape(a:base))
+
+      for m in systemlist("notmuch address -- " . address_tag . " " . search_prefix . shellescape(a:base))
         if complete_check()
           break
         endif
