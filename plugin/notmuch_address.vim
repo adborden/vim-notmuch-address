@@ -33,8 +33,11 @@ function! CompleteNotmuchAddress(findstart, base)
         let address_tag = "tag:" . shellescape(g:notmuch_address_tag)
       endif
 
+      " trim off any spaces
       let mbase = substitute (a:base, '^\s*\(.\{-}\)\s*$', '\1', '')
-      let mbase = substitute (mbase, ' ', '\\s', 'g')
+
+      " replace space with wildcard
+      let mbase = substitute (mbase, ' ', '.*', 'g')
 
       for m in systemlist("notmuch address -- " . address_tag . " " . search_prefix . '/' . shellescape(mbase) . '.*/')
         if complete_check()
