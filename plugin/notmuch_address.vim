@@ -23,9 +23,13 @@ function! CompleteNotmuchAddress(findstart, base)
       if a:base =~ ':'
         " Assume this is a notmuch search query using notmuch-search-terms(7)
         let search_prefix = ""
+        let query=shellescape(a:base)
       else
         " Only search mailboxes from the From: line
         let search_prefix = "from:"
+
+        " Add wildcard for partial match
+        let query = shellescape(a:base . '*')
       endif
 
       let address_tag = ""
@@ -33,7 +37,8 @@ function! CompleteNotmuchAddress(findstart, base)
         let address_tag = "tag:" . shellescape(g:notmuch_address_tag)
       endif
 
-      for m in systemlist("notmuch address -- " . address_tag . " " . search_prefix . shellescape(a:base))
+      let ncommand = "notmuch address -- " . address_tag . " " . search_prefix . query
+      for m in systemlist(ncommand)
         if complete_check()
           break
         endif
